@@ -14,39 +14,45 @@ let counter = 0;
 //     res.sendFile(__dirname + '/index.html');
 // });
 
-var position = {
+var position = [];
+position[0] = {
   x: 200,
-  y: 200
+  y: 200,
+  end: 0,
 }
 
 io.on('connection', (socket) => {
-  console.log("connected " + counter);
-  socket.emit("position", position);
+  socket.emit("position", position[0]);
   counter += 1;
+  console.log("users online " + counter)
 
   socket.on("move", data => {
     switch (data) {
       case "left":
-        position.x -= 5;
-        io.emit("position", position);
+        position[0].x -= 5;
+        io.emit("position", position[0]);
         break;
       case "right":
-        position.x += 5;
-        io.emit("position", position);
+        position[0].x += 5;
+        io.emit("position", position[0]);
         break;
       case "up":
-        position.y -= 5;
-        io.emit("position", position);
+        position[0].y -= 5;
+        io.emit("position", position[0]);
         break;
       case "down":
-        position.y += 5;
-        io.emit("position", position);
+        position[0].y += 5;
+        io.emit("position", position[0]);
         break;
     }
   });
 
+  socket.on("screenDef", (data) => {
+    position[0].end = data.end;
+    console.log("Screen width: "+position[0].end)
+  })
+
   socket.on('disconnect', () => {
-    console.log('user disconnected ' + counter);
     counter -= 1;
     console.log("users online " + counter)
 });
