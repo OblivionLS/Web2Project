@@ -20,7 +20,11 @@
 import io from "socket.io-client";
 import P5 from "p5";
 let p5socket;
-p5socket = io.connect('http://localhost:3000');
+p5socket = io.connect("http://localhost:3000");
+
+let user;
+let screen;
+let colors = ['rgba(107, 255, 245, 0.58)', 'rgba(255, 91, 36, 0.58)', 'rgba(113, 255, 97, 0.64)']
 
 export default {
   name: "Block",
@@ -36,46 +40,74 @@ export default {
   },
 
   created() {
-   // this.socket = io("http://localhost:3000");
+    // this.socket = io("http://localhost:3000");
   },
 
-  mounted() {
+  async mounted() {
+    //event listener to know when the player moves
     document.addEventListener("keydown", (e) => {
       this.moving(e);
     });
 
+    //Getting data which user each player is and what screen he's on.
+    p5socket.on("user", function (data) {
+      user = data;
+      screen = data;
+      p5socket.emit("screenDef", {
+        x: 200,
+        y: 200,
+        end: window.innerWidth,
+        height: window.innerHeight,
+        user: user,
+      });
+      
+      startP5();
+    });
+
+
     //p5 Implementation
-    new P5(function (p5) {
-      let size = 30; //ellipse size
 
-       //p5 setup method
-      p5.setup = () => {
-        p5.createCanvas(window.innerWidth, window.innerHeight);
-        p5.background(30);
-        p5.strokeWeight(20)
-        p5.stroke(255,0,0);
-        p5socket.on('position', p5.draw);
-        console.log("setup complete")
-      };
-      //p5 draw method
-      p5.draw = (position) => {
-        p5.ellipse(position.x, position.y, size);
-        console.log(position.x + " : x positions y : " + position.y)
-      };
+    function startP5() {
+      new P5(function (p5) {
+        let trail = 10; //ellipse size
+        let size = 30;
+        let graphics;
 
-  },);
+        //p5 setup method
+        p5.setup = () => {
+          p5.createCanvas(window.innerWidth, window.innerHeight);
+          p5.background(30);
+          p5.noStroke();
+          graphics = p5.createGraphics(window.innerWidth, window.innerHeight);
+          //p5socket.on('position', p5.draw);
+          //console.log("screen is: " + screen);
+          p5socket.on(screen, p5.draw);
+          console.log("setup complete");
+        };
 
-    p5socket.emit("screenDef", {x:200, y:200, end: window.innerWidth})
-
+        //p5 draw method
+        p5.draw = (position) => {
+          p5.background(30);
+          graphics.fill(colors[1]);
+          graphics.noStroke();
+          graphics.ellipse(position.x, position.y, trail);
+          p5.image(graphics, 0, 0);
+          p5.fill("rgb(255,0,0)");
+          p5.ellipse(position.x, position.y, size);
+          //console.log(position.x + " : x positions y : " + position.y)
+        };
+      });
+    }
   },
 
   methods: {
     move(direction) {
-      p5socket.emit("move", direction);
+      p5socket.emit("move", { data: direction, user: user, screen: screen });
+      //console.log(screen);
     },
 
     moving(e) {
-      console.log("in moving method 2");
+      //console.log("in moving method 2");
       switch (e.which) {
         case 38:
           this.move("up");
