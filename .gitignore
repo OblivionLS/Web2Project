@@ -1,0 +1,4 @@
+server/node_modules/
+docker-compose - Kopie.yml
+client/package-lock.json
+server/package-lock.json

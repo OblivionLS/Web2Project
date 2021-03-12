@@ -20,7 +20,9 @@
 import io from "socket.io-client";
 import P5 from "p5";
 let p5socket;
-p5socket = io.connect("http://localhost:3000");
+console.log(process.env);
+p5socket = io.connect(process.env.VUE_APP_WS_HOST);
+
 
 let user;
 let screen;
