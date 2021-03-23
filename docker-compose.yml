@@ -29,7 +29,7 @@ services:
     networks:
       - app-network
 
-      certbot:
+  certbot:
     image: certbot/certbot
     container_name: certbot
     volumes:
