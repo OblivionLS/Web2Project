@@ -78,7 +78,7 @@ export default {
         //p5 setup method
         p5.setup = () => {
           p5.createCanvas(window.innerWidth, window.innerHeight);
-          p5.background(30);
+          p5.background(200);
           p5.noStroke();
           graphics = p5.createGraphics(window.innerWidth, window.innerHeight);
           //p5socket.on('position', p5.draw);
@@ -89,7 +89,7 @@ export default {
 
         //p5 draw method
         p5.draw = (position) => {
-          p5.background(30);
+          p5.background(150);
           graphics.fill(colors[1]);
           graphics.noStroke();
           graphics.ellipse(position.x, position.y, trail);
