@@ -44,6 +44,11 @@ volumes:
     certbot-etc:
     certbot-var:
     web-root:
+      driver: local
+      driver_opts:
+        type: none
+        device: /home/web3/client/dist/
+        o: bind
     dhparam:
       driver: local
       driver_opts:
