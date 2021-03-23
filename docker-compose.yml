@@ -47,7 +47,7 @@ volumes:
       driver: local
       driver_opts:
         type: none
-        device: /home/web3/Web2Project/client/dist/
+        device: /home/web3/Web2Project/client_build/
         o: bind
     dhparam:
       driver: local
