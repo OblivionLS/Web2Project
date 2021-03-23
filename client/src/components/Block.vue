@@ -89,7 +89,7 @@ export default {
 
         //p5 draw method
         p5.draw = (position) => {
-          p5.background(150);
+          p5.background(250);
           graphics.fill(colors[1]);
           graphics.noStroke();
           graphics.ellipse(position.x, position.y, trail);
