@@ -29,7 +29,6 @@ services:
       - nodejs
     networks:
       - app-network
-
   certbot:
     image: certbot/certbot
     container_name: certbot
@@ -40,7 +39,6 @@ services:
     depends_on:
       - webserver
     command: certonly --webroot --webroot-path=/var/www/html --email lena.schuetz@stud.hslu.ch --agree-tos --no-eff-email --force-renewal -d majestic-flap.ml 
-
 volumes:
   certbot-etc:
   certbot-var:
@@ -51,7 +49,6 @@ volumes:
       type: none
       device: /home/oblivia/Web2Project/dhparam/
       o: bind
-
 networks:
   app-network:
     driver: bridge    
