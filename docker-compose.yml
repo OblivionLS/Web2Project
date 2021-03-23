@@ -21,10 +21,30 @@ services:
       - "443:443"
     volumes:
       - ./nginx-conf:/etc/nginx/conf.d 
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
     depends_on:
       - nodejs
     networks:
       - app-network
+
+      certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - webserver
+    command: certonly --webroot --webroot-path=/var/www/html --email lena.schuetz@stud.hslu.ch --agree-tos --no-eff-email --staging -d majestic-flap.ml  -d www.majestic-flap.ml
+
+volumes:
+  certbot-etc:
+  certbot-var:
+  web-root:
+
 networks:
   app-network:
     driver: bridge    

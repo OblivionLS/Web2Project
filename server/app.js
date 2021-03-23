@@ -72,9 +72,6 @@ io.on('connection', (socket) => {
     screens[counter].left = counter - 1;
   }
 
-  // console.log("🚀 ~ file: app.js ~ line 40 ~ io.on ~ screens[counter]", screens[counter])
-  // console.log("🚀 ~ file: app.js ~ line 61 ~ io.on ~ coordinates", screens[counter].onscreen.coordinates)
-
   user = counter;
   socket.emit("user", user);
   socket.emit("position", position[counter]);

@@ -29,7 +29,14 @@ let colors = [
   "rgba(107, 255, 245, 0.58)",
   "rgba(255, 91, 36, 0.58)",
   "rgba(113, 255, 97, 0.64)",
+  "rgba(235, 30, 143, 0.58)"
 ];
+let wobbleColors = [
+  "rgb(107, 255, 245)",
+  "rgba(235, 74, 20, 1)",
+  "rgb(113, 255, 97)",
+  "rgba(159, 50, 110, 1)"
+]
 
 export default {
   name: "Block",
@@ -73,7 +80,7 @@ export default {
     function startP5() {
       new P5(function (p5) {
         let trail = 10; //ellipse size
-        let size = 50;
+        let size = 40;
         let graphics;
         let xoff = 1;
         let roff = 30; //noise radius along the circle lines
@@ -90,7 +97,7 @@ export default {
           p5.frameRate(10);
           p5.colorMode(p5.HSB, 255);
           p5.angleMode(p5.DEGREES);
-          p5.fill("rgb(255,0,0)");
+          p5.fill(wobbleColors[0]);
           graphics = p5.createGraphics(window.innerWidth, window.innerHeight);
           graphics.noStroke();
           graphics.colorMode(p5.HSB, 255);
@@ -111,7 +118,7 @@ export default {
         };
 
         p5.animation = () => {
-          graphics.fill(colors[1]);
+          graphics.fill(colors[0]);
           //graphics.noStroke();
           //p5.background(30);
           p5.tint(255, 50);
@@ -129,7 +136,7 @@ export default {
         p5.wobble = (n, cx, cy) => {
           let xs = cx;
           let ys = cy;
-          let rn = 5;
+          let rn = 10;
           let r = size;
 
           p5.beginShape();
@@ -148,6 +155,7 @@ export default {
         };
 
         p5.initGraphics = () => {
+          graphics.background(30);
           p5.triangleField();
           p5.noisy();
           p5.image(graphics, 0, 0);
@@ -182,8 +190,8 @@ export default {
             let xoff = 0;
             for (let x = -distx; x < window.innerWidth + distx; x += distx) {
               let r = 220 + p5.noise(xoff, yoff) * 20;
-              let d = 190 - p5.noise(xoff, yoff) * 200;
-              let w = 150 + p5.noise(xoff, yoff) * 100;
+              let d = 150 - p5.noise(xoff, yoff) * 200;
+              let w = 40 + p5.noise(xoff, yoff) * 100;
               graphics.fill(r, w, d);
               //ellipse(x,y, noise(xoff, yoff)* 10);
               let y1 = y - p5.noise(xoff, yoff);
