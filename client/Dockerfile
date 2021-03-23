@@ -8,6 +8,6 @@ RUN npm run build
 
 # production stage
 FROM nginx:stable-alpine as production-stage
-COPY --from=build-stage /app/dist /var/www/html
+COPY --from=build-stage /app/dist /var/www/vue
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
