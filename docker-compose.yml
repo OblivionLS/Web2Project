@@ -38,7 +38,7 @@ services:
       - web-root:/var/www/html
     depends_on:
       - webserver
-    command: certonly --webroot --webroot-path=/var/www/html --email lena.schuetz@stud.hslu.ch --agree-tos --no-eff-email --staging -d majestic-flap.ml 
+    command: certonly --webroot --webroot-path=/var/www/html --email lena.schuetz@stud.hslu.ch --agree-tos --no-eff-email --force-renewal -d majestic-flap.ml 
 volumes:
   certbot-etc:
   certbot-var:
