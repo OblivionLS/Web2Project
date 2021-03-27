@@ -2,7 +2,26 @@
   <div>
     <canvas
       id="canvas"
-      style="width: 100%; height: 100%; position: absolute; top: 0px"
+      style="
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        z-index: 0;
+      "
+    ></canvas>
+    <canvas
+      id="miniscreen"
+      style="
+        width: 35%;
+        height: 40%;
+        position: absolute;
+        bottom: 1em;
+        right: 1em;
+        z-index: 5;
+        border: solid;
+        border-color: rgba(150, 150, 150, 0.89);
+      "
     ></canvas>
   </div>
 </template>
@@ -12,7 +31,6 @@ import io from "socket.io-client";
 import P5 from "p5";
 let p5socket;
 p5socket = io.connect(process.env.VUE_APP_WS_HOST);
-//let myposition;
 let onscreenPositions = [];
 
 p5socket.on("userChange", (data) => {
@@ -29,14 +47,15 @@ let colors = [
   "rgba(107, 255, 245, 0.58)",
   "rgba(255, 91, 36, 0.58)",
   "rgba(113, 255, 97, 0.64)",
-  "rgba(235, 30, 143, 0.58)"
+  "rgba(235, 30, 143, 0.58)",
 ];
 let wobbleColors = [
   "rgb(107, 255, 245)",
   "rgba(235, 74, 20, 1)",
   "rgb(113, 255, 97)",
-  "rgba(159, 50, 110, 1)"
-]
+  "rgba(159, 50, 110, 1)",
+];
+let background_miniscreen = "rgba(0, 0, 0, 0.5)";
 
 export default {
   name: "Block",
@@ -52,6 +71,13 @@ export default {
   },
 
   async mounted() {
+    let miniscreen = document.getElementById("miniscreen");
+    miniscreen.height = window.innerHeight * 0.4;
+    miniscreen.width = window.innerWidth * 0.35;
+    let ctx = miniscreen.getContext("2d");
+    ctx.fillStyle = background_miniscreen;
+    ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
+
     //event listener to know when the player moves
     document.addEventListener("keydown", (e) => {
       this.moving(e);
@@ -108,9 +134,20 @@ export default {
 
         //only called when the object is moved
         p5.drawing = (position) => {
+          ctx.fillStyle = background_miniscreen;
+          ctx.clearRect(0, 0, miniscreen.width, miniscreen.height);
+          ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
+          let minix = (position.coordinates[0].x / window.innerWidth) * miniscreen.width;
+          let miniy = (position.coordinates[0].y / window.innerWidth) * miniscreen.width;
+
           onscreenPositions = position.coordinates;
           screen = position.screen;
           p5.animation();
+
+          ctx.beginPath();
+          ctx.arc(minix, miniy, 10, 0, 2 * Math.PI);
+          ctx.fillStyle = wobbleColors[0];
+          ctx.fill();
         };
 
         p5.draw = () => {
@@ -159,7 +196,7 @@ export default {
           p5.triangleField();
           p5.noisy();
           p5.image(graphics, 0, 0);
-        }
+        };
 
         let inc = 0.1;
         p5.noisy = () => {
@@ -184,7 +221,7 @@ export default {
         p5.triangleField = () => {
           inc = 0.1;
           let distx = window.innerWidth / 20;
-          let disty = window.innerHeight/20;
+          let disty = window.innerHeight / 20;
           sizegraphics = 10 * distx;
           for (let y = -disty; y < window.innerHeight + disty; y += disty) {
             let xoff = 0;
