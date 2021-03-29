@@ -14,6 +14,7 @@ let added = false;
 let size = 60;
 let stepsize = 10;
 
+let miniscreens = [];
 let screens = [];
 var position = [];
 position[0] = {
@@ -44,7 +45,7 @@ io.on('connection', (socket) => {
       onscreen: {
         users: [counter],
         amount: 1,
-        coordinates: [{ x: 200, y: 200 }]
+        coordinates: [{ x: 200, y: 200 }],
       }
     },
   };
@@ -59,26 +60,21 @@ io.on('connection', (socket) => {
     onscreen: {
       users: [counter],
       amount: 1,
-      coordinates: [{ x: 200, y: 200 }]
+      coordinates: [{ x: 200, y: 200 }],
+      onminiscreen: [{ x: 200, y: 200 }],
     }
   };
-
-
-
   if (counter != 0) {
     position[counter - 1].screen.right = counter;
     position[counter].screen.left = counter - 1;
     screens[counter - 1].right = counter;
     screens[counter].left = counter - 1;
   }
-
   user = counter;
   socket.emit("user", user);
   socket.emit("position", position[counter]);
   counter += 1;
   console.log("users online " + counter)
-
-
 
   //============================================================
   //Move Method
@@ -140,6 +136,8 @@ io.on('connection', (socket) => {
     screens[position[data.user].myscreen].height = data.height;
     screens[data.user].height = data.height;
     screens[data.user].width = data.end;
+    screens[data.user].onscreen.onminiscreen = [{x: data.x, y: data.y}];
+    miniscreens[data.user] = [{x: data.x, y: data.y, height: data.height, width: data.end}]
     socket.id = data; // socket stores the username
   })
 
@@ -169,38 +167,30 @@ io.on('connection', (socket) => {
 function updateXposition(user, screen, value) {
   let update = screens[screen].onscreen.users.indexOf(user);
   screens[screen].onscreen.coordinates[update].x += value;
-  //console.log("🚀 ~ file: app.js ~ line 173 ~ updateXposition ~ screens[screen]", screens[screen])
-  position[user].x += value;
+  screens[user].onscreen.onminiscreen[update] = screens[screen].onscreen.coordinates[update];
+   position[user].x += value;
+  // console.log(screens[user].onscreen.onminiscreen[update].x)
 }
 
 function updateYposition(user, screen, value) {
   let update = screens[screen].onscreen.users.indexOf(user);
   screens[screen].onscreen.coordinates[update].y += value;
+  screens[user].onscreen.onminiscreen[update] = screens[screen].onscreen.coordinates[update];
   position[user].y += value;
 }
 
-function addToRightScreen(data) {
-  if (!position[data.user].added) {
-    let indexUser = screens[position[data.user].myscreen].onscreen.users.indexOf(data.user);
-    position[data.user].x2 = screens[position[data.user].myscreen].onscreen.coordinates[indexUser].x - screens[position[data.user].myscreen].width;
-    position[data.user].y2 = position[data.user].y / screens[position[data.user].myscreen].height * screens[screens[position[data.user].myscreen].right].height;
-    screens[screens[position[data.user].myscreen].right].onscreen.amount += 1;
-    screens[screens[position[data.user].myscreen].right].onscreen.users.push(data.user)
-    screens[screens[position[data.user].myscreen].right].onscreen.coordinates.push({ x: position[data.user].x2, y: position[data.user].y2 });
-    position[data.user].added = true;
-  } else {
-    //updateXposition(data.user, screens[position[data.user].myscreen].right, +stepsize);
-    (data) => {
-      let screen = screens[position[data.user].myscreen].right;
-      let update = screens[screen].onscreen.users.indexOf(data.user);
-      screens[screen].onscreen.coordinates[update].x += stepsize;
-      position[user].x2 += stepsize;
-      position[user].x += stepsize;
-      io.emit(screen, screens[screen].onscreen)
-    }
-    updateXposition(data.user, position[data.user].myscreen, +stepsize)
-  }
+function addingCoordinates2miniscreen(user, newscreen, oldscreen, removeindex){
+  screens[user].onscreen.onminiscreen = [];
+  screens[oldscreen].onscreen.onminiscreen.splice(removeindex, 1);
+  miniscreens[user] = [];
+   //screens[user].onscreen.onminiscreen = screens[newscreen].onscreen.coordinates
+   console.log(screens[user].onscreen.onminiscreen);
+  for(let i = 0; i < screens[newscreen].onscreen.coordinates.length; i++){
+    //screens[user].onscreen.onminiscreen.push(screens[newscreen].onscreen.coordinates[i]);
+   //miniscreens[user].push()
+ }
 }
+
 function changingScreenRight(data) {
   //calculating new coordinates
   position[data.user].x = position[data.user].x - screens[position[data.user].myscreen].width - 2*size;
@@ -214,36 +204,11 @@ function changingScreenRight(data) {
   //adding new user data to screen
   screens[screens[position[data.user].myscreen].right].onscreen.users.push(data.user)
   screens[screens[position[data.user].myscreen].right].onscreen.coordinates.push({ x: position[data.user].x, y: position[data.user].y });
+  addingCoordinates2miniscreen(data.user, screens[position[data.user].myscreen].right, position[data.user].myscreen, remove)
   position[data.user].myscreen = screens[position[data.user].myscreen].right
-  position[data.user].added = false;
-  //  screens[position[data.user].myscreen] = screens[screens[position[data.user].myscreen].right];
-  //updateXposition(data.user, position[data.user].myscreen, +stepsize);
-  console.log("changed to right screen");
 }
 
-function addToLeftScreen(data) {
-  if (!position[data.user].added) {
-    position[data.user].x2 = screens[screens[position[data.user].myscreen].left].width + position[data.user].x;
-    position[data.user].y2 = position[data.user].y / screens[position[data.user].myscreen].height * screens[screens[position[data.user].myscreen].left].height
-    screens[screens[position[data.user].myscreen].left].onscreen.amount += 1;
-    screens[screens[position[data.user].myscreen].left].onscreen.users.push(data.user);
-    screens[screens[position[data.user].myscreen].left].onscreen.coordinates.push({ x: position[data.user].x2, y: position[data.user].y2 });
-    position[data.user].added = true;
-  } else {
-    updateXposition(data.user, position[data.user].myscreen, -stepsize);
-    //change on left screen
-    //updateXposition in Arrow function, since x2 has to be updated
-    (data) => {
-      let screen = screens[position[data.user].myscreen].left;
-      let update = screens[screen].onscreen.users.indexOf(data.user);
-      screens[screen].onscreen.coordinates[update].x -= stepsize;
-      position[user].x2 -= stepsize;
-      position[user].x -= stepsize;
-      io.emit(screen, screens[screen].onscreen)
-    }
-    //updateXposition(data.user, screens[position[data.user].myscreen].left, -5);
-  }
-}
+
 function changingScreenLeft(data) {
   position[data.user].x = position[data.user].x + screens[screens[position[data.user].myscreen].left].width + 2*size;
   position[data.user].y = (position[data.user].y / screens[position[data.user].myscreen].height) * screens[screens[position[data.user].myscreen].left].height;
@@ -256,11 +221,8 @@ function changingScreenLeft(data) {
   //adding new user data to other screen
   screens[screens[position[data.user].myscreen].left].onscreen.users.push(data.user);
   screens[screens[position[data.user].myscreen].left].onscreen.coordinates.push({ x: position[data.user].x, y: position[data.user].y });
-  position[data.user].added = false;
+  addingCoordinates2miniscreen(data.user, screens[position[data.user].myscreen].left, position[data.user].myscreen, remove);
   position[data.user].myscreen = screens[position[data.user].myscreen].left;
-  //  screens[position[data.user].myscreen] = screens[screens[position[data.user].myscreen].left];
-  //updateXposition(data.user, position[data.user].myscreen, -stepsize);
-  console.log("changed to left screen");
 }
 
 
@@ -301,3 +263,54 @@ server.listen(3000, () => {
   //   }
   //   io.emit("positions", onScreen);
   // });
+
+
+
+
+
+  // function addToLeftScreen(data) {
+  //   if (!position[data.user].added) {
+  //     position[data.user].x2 = screens[screens[position[data.user].myscreen].left].width + position[data.user].x;
+  //     position[data.user].y2 = position[data.user].y / screens[position[data.user].myscreen].height * screens[screens[position[data.user].myscreen].left].height
+  //     screens[screens[position[data.user].myscreen].left].onscreen.amount += 1;
+  //     screens[screens[position[data.user].myscreen].left].onscreen.users.push(data.user);
+  //     screens[screens[position[data.user].myscreen].left].onscreen.coordinates.push({ x: position[data.user].x2, y: position[data.user].y2 });
+  //     position[data.user].added = true;
+  //   } else {
+  //     updateXposition(data.user, position[data.user].myscreen, -stepsize);
+  //     //change on left screen
+  //     //updateXposition in Arrow function, since x2 has to be updated
+  //     (data) => {
+  //       let screen = screens[position[data.user].myscreen].left;
+  //       let update = screens[screen].onscreen.users.indexOf(data.user);
+  //       screens[screen].onscreen.coordinates[update].x -= stepsize;
+  //       position[user].x2 -= stepsize;
+  //       position[user].x -= stepsize;
+  //       io.emit(screen, screens[screen].onscreen)
+  //     }
+  //     //updateXposition(data.user, screens[position[data.user].myscreen].left, -5);
+  //   }
+  // }
+
+  // function addToRightScreen(data) {
+  //   if (!position[data.user].added) {
+  //     let indexUser = screens[position[data.user].myscreen].onscreen.users.indexOf(data.user);
+  //     position[data.user].x2 = screens[position[data.user].myscreen].onscreen.coordinates[indexUser].x - screens[position[data.user].myscreen].width;
+  //     position[data.user].y2 = position[data.user].y / screens[position[data.user].myscreen].height * screens[screens[position[data.user].myscreen].right].height;
+  //     screens[screens[position[data.user].myscreen].right].onscreen.amount += 1;
+  //     screens[screens[position[data.user].myscreen].right].onscreen.users.push(data.user)
+  //     screens[screens[position[data.user].myscreen].right].onscreen.coordinates.push({ x: position[data.user].x2, y: position[data.user].y2 });
+  //     position[data.user].added = true;
+  //   } else {
+  //     //updateXposition(data.user, screens[position[data.user].myscreen].right, +stepsize);
+  //     (data) => {
+  //       let screen = screens[position[data.user].myscreen].right;
+  //       let update = screens[screen].onscreen.users.indexOf(data.user);
+  //       screens[screen].onscreen.coordinates[update].x += stepsize;
+  //       position[user].x2 += stepsize;
+  //       position[user].x += stepsize;
+  //       io.emit(screen, screens[screen].onscreen)
+  //     }
+  //     updateXposition(data.user, position[data.user].myscreen, +stepsize)
+  //   }
+  // }

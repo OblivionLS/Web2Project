@@ -137,22 +137,35 @@ export default {
           ctx.fillStyle = background_miniscreen;
           ctx.clearRect(0, 0, miniscreen.width, miniscreen.height);
           ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
-          let minix = (position.coordinates[0].x / window.innerWidth) * miniscreen.width;
-          let miniy = (position.coordinates[0].y / window.innerWidth) * miniscreen.width;
 
           onscreenPositions = position.coordinates;
           screen = position.screen;
           p5.animation();
 
-          ctx.beginPath();
-          ctx.arc(minix, miniy, 10, 0, 2 * Math.PI);
-          ctx.fillStyle = wobbleColors[0];
-          ctx.fill();
+          animateMiniscreen(position);
         };
 
         p5.draw = () => {
           p5.animation();
         };
+
+        function animateMiniscreen(position) {
+          console.log(position.onminiscreen.length);
+          for (let i = 0; i < position.onminiscreen.length; i++) {
+            let minix =
+              (position.onminiscreen[i].x / window.innerWidth) *
+              miniscreen.width;
+            let miniy =
+              (position.onminiscreen[i].y / window.innerWidth) *
+              miniscreen.width;
+
+            ctx.beginPath();
+            ctx.arc(minix, miniy, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = wobbleColors[0];
+            ctx.fill();
+            console.log("drew a mini circle");
+          }
+        }
 
         p5.animation = () => {
           graphics.fill(colors[0]);
