@@ -22,18 +22,18 @@ Domain has to be connected to the IP-Adress of the Azure VM.
 For https to work the networksettings have to be adjusted on the Azure VM to verify the server client communication.
 
 ### Helpful Links on the Matter
-https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04 - automatic!
-https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04#step-3-%E2%80%94-using-the-docker-command - automatic!
-https://www.digitalocean.com/community/tutorials/how-to-install-docker-compose-on-ubuntu-18-04 - automatic!
+https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04#step-3-%E2%80%94-using-the-docker-command
+https://www.digitalocean.com/community/tutorials/how-to-install-docker-compose-on-ubuntu-18-04
 clone git project by using: git clone https://url
 build project with docker commands
 (for the first build some adjustments in docker-compose certbot have to be made to get the https certificate)
 
 #### When using Windows
 On windows you can use Putty to connect to the server and run the commands.
-download: https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.74-installer.msi - automatic!
+download: https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.74-installer.msi
 To connect to the Server you first have to do some ajustments in Putty and deposit your SSH key to connect to the Azure Server.
-https://help.communicationsquare.com/article/103-how-to-connect-to-a-linux-vm-using-putty - automatic!
+https://help.communicationsquare.com/article/103-how-to-connect-to-a-linux-vm-using-putty
 after connecting you can use your linux commands to do changes on your VM.
 
 ### Updating Deploy
