@@ -71,6 +71,8 @@ export default {
   },
 
   async mounted() {
+    let screenChanged = true;
+    console.log(screenChanged);
     let miniscreen = document.getElementById("miniscreen");
     miniscreen.height = window.innerHeight * 0.4;
     miniscreen.width = window.innerWidth * 0.35;
@@ -81,13 +83,42 @@ export default {
     //event listener to know when the player moves
     document.addEventListener("keydown", (e) => {
       this.moving(e);
+      miniscreenScaling();
     });
+
+    p5socket.on("screenChanged", (data)=>{
+      if(user == data.user){
+        screen = data.onscreen;
+        screenChanged = true;
+      }
+    })
+    function miniscreenScaling() {
+      console.log("screen is : " + screen + " and user is : " + user);
+      if (user != screen && screenChanged) {
+        miniscreen.height = window.innerHeight * 0.6;
+        miniscreen.width = window.innerWidth * 0.6;
+        miniscreen.style.height = "65%";
+        miniscreen.style.width = "65%";
+        ctx.fillStyle = background_miniscreen;
+        ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
+        screenChanged = false;
+      } else if(screenChanged) {
+        miniscreen.height = window.innerHeight * 0.4;
+        miniscreen.width = window.innerWidth * 0.35;
+        miniscreen.style.height = "40%";
+        miniscreen.style.width = "35%";
+        ctx.fillStyle = background_miniscreen;
+        ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
+        screenChanged = false;
+      }
+    }
 
     //Getting data which user each player is and what screen he's on.
     p5socket.on("user", function (data) {
       user = data;
       console.log("user: " + user);
       screen = data;
+      console.log("🚀 ~ file: Block.vue ~ line 104 ~ screen", screen);
       // myposition = { x: 200, y: 200 };
       onscreenPositions = [{ x: 200, y: 200 }];
       p5socket.emit("screenDef", {
@@ -97,6 +128,7 @@ export default {
         height: window.innerHeight,
         user: user,
       });
+      screenChanged = true;
       console.log(onscreenPositions);
       startP5();
     });
@@ -134,36 +166,32 @@ export default {
 
         //only called when the object is moved
         p5.drawing = (position) => {
-          ctx.fillStyle = background_miniscreen;
-          ctx.clearRect(0, 0, miniscreen.width, miniscreen.height);
-          ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
-
           onscreenPositions = position.coordinates;
-          screen = position.screen;
+          //screen = position.nr;
           p5.animation();
-
-          animateMiniscreen(position);
         };
 
         p5.draw = () => {
           p5.animation();
         };
 
+        p5socket.on("miniscreen", animateMiniscreen);
         function animateMiniscreen(position) {
-          console.log(position.onminiscreen.length);
-          for (let i = 0; i < position.onminiscreen.length; i++) {
+          ctx.fillStyle = background_miniscreen;
+          ctx.clearRect(0, 0, miniscreen.width, miniscreen.height);
+          ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
+          ctx.fillStyle = wobbleColors[0];
+          for (let i = 0; i < position[user].length - 1; i++) {
+            let screenIndex = position[user].length - 1;
             let minix =
-              (position.onminiscreen[i].x / window.innerWidth) *
+              (position[user][i].x / position[user][screenIndex].width) *
               miniscreen.width;
             let miniy =
-              (position.onminiscreen[i].y / window.innerWidth) *
-              miniscreen.width;
-
+              (position[user][i].y / position[user][screenIndex].height) *
+              miniscreen.height;
             ctx.beginPath();
             ctx.arc(minix, miniy, 10, 0, 2 * Math.PI);
-            ctx.fillStyle = wobbleColors[0];
             ctx.fill();
-            console.log("drew a mini circle");
           }
         }
 
@@ -171,7 +199,7 @@ export default {
           graphics.fill(colors[0]);
           //graphics.noStroke();
           //p5.background(30);
-          p5.tint(255, 50);
+          //p5.tint(255, 50);   //ist eine performance bremse :(
           p5.image(graphics, 0, 0);
           for (let i = 0; i < onscreenPositions.length; i++) {
             graphics.ellipse(
