@@ -81,9 +81,6 @@ io.on('connection', (socket) => {
           if (position[data.user].x <= 0 - size) {
             changingScreenLeft(data);
           } else {
-            //add user to the second screen aswell as still keeping him on the first.
-            // addToLeftScreen(data);
-            // io.emit(screen, screens[screens[screen].left].onscreen);
             updateXposition(data.user, screen, -stepsize);
             io.emit(screen, screens[screen].onscreen);
           }
@@ -97,16 +94,13 @@ io.on('connection', (socket) => {
           if (position[data.user].x >= screens[screen].width + size) { //if out of range from first screen it changes to second screen
             changingScreenRight(data)
           } else {
-            // addToRightScreen(data)
-            updateXposition(data.user, screen, + stepsize);
+            updateXposition(data.user, screen, stepsize);
             io.emit(screen, screens[screen].onscreen);
-            // io.emit(screen, screens[screens[screen].right].onscreen);
           }
         }
         break;
       case "up":
         if (position[data.user].y - size >= 0) {
-          //position[data.user].y -= 5;
           updateYposition(data.user, screen, -stepsize);
           io.emit(screen, screens[screen].onscreen);
         }
@@ -158,29 +152,29 @@ io.on('connection', (socket) => {
 function updateXposition(user, screen, value) {
   let update = screens[screen].onscreen.users.indexOf(user);
   screens[screen].onscreen.coordinates[update].x += value;
-  //screens[user].onscreen.onminiscreen[update] = screens[screen].onscreen.coordinates[update];
-  miniscreens[user][update].x = screens[screen].onscreen.coordinates[update].x;
+  for(let i = 0; i < screens[screen].onscreen.users.length; i++){
+    let updateUser = screens[screen].onscreen.users[i];
+    miniscreens[updateUser][update].x = screens[screen].onscreen.coordinates[update].x;
+  }
    position[user].x += value;
-  // console.log(screens[user].onscreen.onminiscreen[update].x)
   io.emit("miniscreen", miniscreens); //change this later for performance
 }
 
 function updateYposition(user, screen, value) {
   let update = screens[screen].onscreen.users.indexOf(user);
   screens[screen].onscreen.coordinates[update].y += value;
-  //screens[user].onscreen.onminiscreen[update] = screens[screen].onscreen.coordinates[update];
-  miniscreens[user][update].y = screens[screen].onscreen.coordinates[update].y;
+  for(let i = 0; i < screens[screen].onscreen.users.length; i++){
+    let updateUser = screens[screen].onscreen.users[i]
+    miniscreens[updateUser][update].y = screens[screen].onscreen.coordinates[update].y;
+  }
+  //miniscreens[user][update].y = screens[screen].onscreen.coordinates[update].y;
   position[user].y += value;
   io.emit("miniscreen", miniscreens);
 }
 
 function addingCoordinates2miniscreen(user, newscreen){
-  //screens[user].onscreen.onminiscreen = [];
-  //screens[oldscreen].onscreen.onminiscreen.splice(removeindex, 1);
   miniscreens[user] = [];
-   //screens[user].onscreen.onminiscreen = screens[newscreen].onscreen.coordinates
   for(let i = 0; i < screens[newscreen].onscreen.coordinates.length; i++){
-    //screens[user].onscreen.onminiscreen.push(screens[newscreen].onscreen.coordinates[i]);
    miniscreens[user].push(screens[newscreen].onscreen.coordinates[i]);
  }
  miniscreens[user].push({height: screens[newscreen].height, width: screens[newscreen].width})
@@ -191,6 +185,7 @@ function updatingOtherMiniscreens(user, newscreen){
   for(let i = 0; i < screens[newscreen].onscreen.users.length; i++){
     if(screens[newscreen].onscreen.users[i] != user){
       let updateuser = screens[newscreen].onscreen.users[i];
+      //console.log("updating user: " + updateuser + " and adding coordinates of: " + user);
       let screendim = miniscreens[updateuser].pop();
       miniscreens[updateuser].push({x: position[user].x, y: position[user].y});
       miniscreens[updateuser].push(screendim);

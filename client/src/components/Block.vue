@@ -177,6 +177,7 @@ export default {
 
         p5socket.on("miniscreen", animateMiniscreen);
         function animateMiniscreen(position) {
+          console.log(position)
           ctx.fillStyle = background_miniscreen;
           ctx.clearRect(0, 0, miniscreen.width, miniscreen.height);
           ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);

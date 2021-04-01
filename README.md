@@ -7,7 +7,6 @@ In this project I use a combination of the following web technologies:
 * p5.js
 * docker (docker-compose)
 * nginx
-* certbot
 
 ## Composition Overview
 The following images should give you some Idea of how the different containers and Code parts interact with each other.
