@@ -29,6 +29,7 @@
 <script>
 import io from "socket.io-client";
 import P5 from "p5";
+import gsap from "gsap";
 let p5socket;
 p5socket = io.connect(process.env.VUE_APP_WS_HOST);
 let onscreenPositions = [];
@@ -71,8 +72,7 @@ export default {
   },
 
   async mounted() {
-    let screenChanged = true;
-    console.log(screenChanged);
+    let screenChanged = false;
     let miniscreen = document.getElementById("miniscreen");
     miniscreen.height = window.innerHeight * 0.4;
     miniscreen.width = window.innerWidth * 0.35;
@@ -87,26 +87,42 @@ export default {
     });
 
     p5socket.on("screenChanged", (data)=>{
+      console.log("screen Changed was called.");
       if(user == data.user){
         screen = data.onscreen;
         screenChanged = true;
       }
     })
     function miniscreenScaling() {
-      console.log("screen is : " + screen + " and user is : " + user);
       if (user != screen && screenChanged) {
+        console.log("from small to big.")
+        gsap.from(miniscreen, {
+          height: "40%",
+          width: "35%",
+        });
+        gsap.to(miniscreen, {
+          height: "65%",
+          width: "65%",
+          duration: 1,
+        })
         miniscreen.height = window.innerHeight * 0.6;
         miniscreen.width = window.innerWidth * 0.6;
-        miniscreen.style.height = "65%";
-        miniscreen.style.width = "65%";
         ctx.fillStyle = background_miniscreen;
         ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
         screenChanged = false;
       } else if(screenChanged) {
+        console.log("from big to small.")
+        gsap.from(miniscreen, {
+          height: "65%",
+          width: "65%",
+        });
+        gsap.to(miniscreen, {
+          height: "40%",
+          width: "35%",
+          duration: 1,
+        })
         miniscreen.height = window.innerHeight * 0.4;
         miniscreen.width = window.innerWidth * 0.35;
-        miniscreen.style.height = "40%";
-        miniscreen.style.width = "35%";
         ctx.fillStyle = background_miniscreen;
         ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
         screenChanged = false;
@@ -116,10 +132,7 @@ export default {
     //Getting data which user each player is and what screen he's on.
     p5socket.on("user", function (data) {
       user = data;
-      console.log("user: " + user);
       screen = data;
-      console.log("🚀 ~ file: Block.vue ~ line 104 ~ screen", screen);
-      // myposition = { x: 200, y: 200 };
       onscreenPositions = [{ x: 200, y: 200 }];
       p5socket.emit("screenDef", {
         x: 200,
@@ -128,13 +141,10 @@ export default {
         height: window.innerHeight,
         user: user,
       });
-      screenChanged = true;
-      console.log(onscreenPositions);
       startP5();
     });
 
     //p5 Implementation
-
     function startP5() {
       new P5(function (p5) {
         let trail = 10; //ellipse size
@@ -143,9 +153,6 @@ export default {
         let xoff = 1;
         let roff = 30; //noise radius along the circle lines
         let xn = 5;
-
-        //background color
-        //let background = "rgba(30,30,30,0.2)";
 
         //p5 setup method
         p5.setup = () => {
@@ -160,14 +167,12 @@ export default {
           graphics.noStroke();
           graphics.colorMode(p5.HSB, 255);
           p5socket.on(screen, p5.drawing); //calling on drawing method from socket
-          console.log("setup complete");
           p5.initGraphics();
         };
 
         //only called when the object is moved
         p5.drawing = (position) => {
           onscreenPositions = position.coordinates;
-          //screen = position.nr;
           p5.animation();
         };
 
@@ -177,7 +182,6 @@ export default {
 
         p5socket.on("miniscreen", animateMiniscreen);
         function animateMiniscreen(position) {
-          console.log(position)
           ctx.fillStyle = background_miniscreen;
           ctx.clearRect(0, 0, miniscreen.width, miniscreen.height);
           ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
@@ -198,8 +202,6 @@ export default {
 
         p5.animation = () => {
           graphics.fill(colors[0]);
-          //graphics.noStroke();
-          //p5.background(30);
           //p5.tint(255, 50);   //ist eine performance bremse :(
           p5.image(graphics, 0, 0);
           for (let i = 0; i < onscreenPositions.length; i++) {
@@ -272,7 +274,6 @@ export default {
               let d = 150 - p5.noise(xoff, yoff) * 200;
               let w = 40 + p5.noise(xoff, yoff) * 100;
               graphics.fill(r, w, d);
-              //ellipse(x,y, noise(xoff, yoff)* 10);
               let y1 = y - p5.noise(xoff, yoff);
               let x2 = x + p5.noise(xoff, yoff) * sizegraphics;
               let y2 = y + p5.noise(xoff, yoff) * sizegraphics;
@@ -293,11 +294,9 @@ export default {
   methods: {
     move(direction) {
       p5socket.emit("move", { data: direction, user: user, screen: screen });
-      //console.log(screen);
     },
 
     moving(e) {
-      //console.log("in moving method 2");
       switch (e.which) {
         case 38:
           this.move("up");
