@@ -13,6 +13,11 @@ The following images should give you some Idea of how the different containers a
 ### Architekturdiagramm
 ![Architekturdiagramm](./client/src/assets/architekturdiagramm.png);
 
+### Sequenzdiagramm
+The image shows how the positions on the miniscreens are updated.
+All the coordinates of the miniscreens are broadcasted and the client then picks out the needed data.
+![Sequenzdiagramm](./client/src/assets/sequenzdiagramm_miniscreen.png);
+
 # Further Documentation
 ## Deployment
 The project was first deployed on Azure by creating a virtual machine. 
