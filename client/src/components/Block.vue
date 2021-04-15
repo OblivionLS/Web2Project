@@ -41,9 +41,11 @@ p5socket.on("userChange", (data) => {
     console.log("user changed to: " + user);
   }
 });
-
+let fps = 10;
 let user;
 let screen;
+let myposition = {x: 200, y: 200};
+console.log(myposition);
 let colors = [
   "rgba(107, 255, 245, 0.58)",
   "rgba(255, 91, 36, 0.58)",
@@ -54,8 +56,14 @@ let wobbleColors = [
   "rgb(107, 255, 245)",
   "rgba(235, 74, 20, 1)",
   "rgb(113, 255, 97)",
-  "rgba(159, 50, 110, 1)",
+  "rgba(194, 61, 134, 1)",
 ];
+// let miniColors = [
+//   "rgba(177, 211, 209, 1)",
+//   "rgba(212, 177, 165, 1)",
+//   "rgba(179, 207, 176, 1)",
+//   "rgba(203, 170, 188, 1)",
+// ]
 let background_miniscreen = "rgba(0, 0, 0, 0.5)";
 
 export default {
@@ -84,7 +92,11 @@ export default {
     document.addEventListener("keydown", (e) => {
       this.moving(e);
       miniscreenScaling();
+      //fps = 40;
     });
+    document.addEventListener("keyup", () => {
+      fps = 20;
+    })
 
     p5socket.on("screenChanged", (data)=>{
       console.log("screen Changed was called.");
@@ -159,7 +171,7 @@ export default {
           p5.createCanvas(window.innerWidth, window.innerHeight);
           p5.background(30);
           p5.noStroke();
-          p5.frameRate(10);
+          p5.frameRate(fps);
           p5.colorMode(p5.HSB, 255);
           p5.angleMode(p5.DEGREES);
           p5.fill(wobbleColors[0]);
@@ -173,26 +185,28 @@ export default {
         //only called when the object is moved
         p5.drawing = (position) => {
           onscreenPositions = position.coordinates;
-          p5.animation();
+          fps = 40;
         };
 
         p5.draw = () => {
+          p5.frameRate(fps);
           p5.animation();
         };
 
         p5socket.on("miniscreen", animateMiniscreen);
-        function animateMiniscreen(position) {
+        function animateMiniscreen(data) {
+          //console.log(position);
           ctx.fillStyle = background_miniscreen;
-          ctx.clearRect(0, 0, miniscreen.width, miniscreen.height);
+          ctx.clearRect(0, 0, data.miniscreen.width, miniscreen.height);
           ctx.fillRect(0, 0, miniscreen.width, miniscreen.height);
           ctx.fillStyle = wobbleColors[0];
-          for (let i = 0; i < position[user].length - 1; i++) {
-            let screenIndex = position[user].length - 1;
+          let screenIndex = data.miniscreen[user].length - 1;
+          for (let i = 0; i < data.miniscreen[user].length - 1; i++) {
             let minix =
-              (position[user][i].x / position[user][screenIndex].width) *
+              (data.miniscreen[user][i].x / data.miniscreen[user][screenIndex].width) *
               miniscreen.width;
             let miniy =
-              (position[user][i].y / position[user][screenIndex].height) *
+              (data.miniscreen[user][i].y / data.miniscreen[user][screenIndex].height) *
               miniscreen.height;
             ctx.beginPath();
             ctx.arc(minix, miniy, 10, 0, 2 * Math.PI);
@@ -231,7 +245,7 @@ export default {
 
             xoff = xn + rn * p5.sin(i * a);
           }
-          xn += 0.05;
+          xn += 0.03;
           p5.endShape(p5.CLOSE);
         };
 
