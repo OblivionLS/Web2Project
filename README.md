@@ -11,7 +11,7 @@ In this project I use a combination of the following web technologies:
 ## Composition Overview
 The following images should give you some Idea of how the different containers and Code parts interact with each other.
 ### Architekturdiagramm
-![Architekturdiagramm](./client/src/assets/diagram_1.png);
+![Architekturdiagramm](./client/src/assets/architekturdiagramm.png);
 
 # Further Documentation
 ## Deployment
