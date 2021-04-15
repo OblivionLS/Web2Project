@@ -11,12 +11,12 @@ In this project I use a combination of the following web technologies:
 ## Composition Overview
 The following images should give you some Idea of how the different containers and Code parts interact with each other.
 ### Architekturdiagramm
-![Architekturdiagramm](./client/src/assets/architekturdiagramm.png);
+![Architekturdiagramm](./client/src/assets/architekturdiagramm.png)
 
 ### Sequenzdiagramm
 The image shows how the positions on the miniscreens are updated.
 All the coordinates of the miniscreens are broadcasted and the client then picks out the needed data.
-![Sequenzdiagramm](./client/src/assets/sequenzdiagramm_miniscreen.png);
+![Sequenzdiagramm](./client/src/assets/sequenzdiagramm_miniscreen.png)
 
 # Further Documentation
 ## Deployment
